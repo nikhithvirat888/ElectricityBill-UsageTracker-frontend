@@ -1,5 +1,5 @@
 // ====== Shared helpers (used by every page) ======
-const API = "http://localhost:8080/api";   // change if your backend runs elsewhere
+const API =  "https://electriccitytracker-backend.onrender.com/api";   // change if your backend runs elsewhere
 const getToken = () => localStorage.getItem("token");
 const getUser = () => JSON.parse(localStorage.getItem("user") || "null");
 
