@@ -1,1 +1,1 @@
-electriccitytracker-frontend-git-main-electriccity.vercel.app
+electricity-bill-usage-tracker-fron.vercel.app
