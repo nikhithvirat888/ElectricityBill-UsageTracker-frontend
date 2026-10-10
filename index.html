@@ -1,1 +1,233 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><script>location.replace(localStorage.getItem("token") ? "dashboard.html" : "login.html");</script></head></html>
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electricity Tracker | Home</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f8fc;
+            color: #183047;
+        }
+
+        header {
+            background: #102d46;
+            color: white;
+            padding: 20px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 23px;
+            font-weight: bold;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .hero {
+            min-height: 480px;
+            padding: 80px 8%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+            flex-wrap: wrap;
+            background: linear-gradient(135deg, #e5f3ff, #ffffff);
+        }
+
+        .hero-content {
+            max-width: 600px;
+        }
+
+        .hero h1 {
+            font-size: clamp(34px, 5vw, 52px);
+            line-height: 1.15;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 span {
+            color: #1479cc;
+        }
+
+        .hero p {
+            font-size: 18px;
+            line-height: 1.7;
+            color: #526579;
+            margin-bottom: 28px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 24px;
+            margin: 5px 8px 5px 0;
+            border-radius: 8px;
+            background: #1479cc;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1479cc;
+            border: 2px solid #1479cc;
+        }
+
+        .hero-icon {
+            font-size: 125px;
+            text-align: center;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .features {
+            padding: 55px 8%;
+            text-align: center;
+        }
+
+        .features h2 {
+            font-size: 30px;
+            margin-bottom: 12px;
+        }
+
+        .features-intro {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 28px 22px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px #102d4610;
+        }
+
+        .feature-card .icon {
+            font-size: 38px;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        footer {
+            background: #102d46;
+            color: white;
+            text-align: center;
+            padding: 22px;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 18px 5%;
+            }
+
+            nav a {
+                margin-left: 12px;
+            }
+
+            .hero {
+                padding: 55px 6%;
+            }
+
+            .hero-icon {
+                font-size: 90px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">⚡ Electricity Tracker</div>
+
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="login.html">Login</a>
+            <a href="login.html">Get Started</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Track Your Electricity.<br>
+                    <span>Manage It Smarter.</span>
+                </h1>
+
+                <p>
+                    Welcome to Electricity Usage and Bill Tracker!
+                    Monitor your electricity bills, manage appliances,
+                    and understand your energy consumption in one place.
+                </p>
+
+                <a href="login.html" class="btn">Get Started →</a>
+                <a href="login.html" class="btn btn-secondary">Login</a>
+            </div>
+
+            <div class="hero-icon" aria-hidden="true">⚡💡</div>
+        </section>
+
+        <section class="features">
+            <h2>Everything You Need</h2>
+            <p class="features-intro">
+                Simple tools to help you keep track of electricity usage.
+            </p>
+
+            <div class="feature-grid">
+                <article class="feature-card">
+                    <div class="icon">🧾</div>
+                    <h3>Bill Tracking</h3>
+                    <p>Record and review your electricity bills in one place.</p>
+                </article>
+
+                <article class="feature-card">
+                    <div class="icon">📊</div>
+                    <h3>Usage Monitoring</h3>
+                    <p>Review your electricity consumption and usage trends.</p>
+                </article>
+
+                <article class="feature-card">
+                    <div class="icon">💡</div>
+                    <h3>Appliance Management</h3>
+                    <p>Keep your household appliances organized.</p>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Electricity Usage and Bill Tracker | Manage energy wisely.</p>
+    </footer>
+</body>
+</html>
+```
