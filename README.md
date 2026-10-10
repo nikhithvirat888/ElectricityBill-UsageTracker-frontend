@@ -1,1 +1,1 @@
-electriccitytracker-frontend.vercel.app
+electriccitytracker-frontend-git-main-electriccity.vercel.app
