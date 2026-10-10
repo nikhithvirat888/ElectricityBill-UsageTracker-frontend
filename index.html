@@ -4,73 +4,193 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Electricity Bill & Usage Tracker</title>
+<meta name="description" content="Track meter readings, bills and appliance usage. Estimate your electricity bill instantly.">
 <link rel="stylesheet" href="css/style.css">
 <style>
-  .top{background:var(--ink);display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.25rem;flex-wrap:wrap;gap:.5rem}
-  .top .brand{color:var(--amber);font-weight:700;font-size:1.1rem}
-  .top a.link{color:#c9d3de;text-decoration:none;margin-left:1rem}
-  .top a.link:hover{color:#fff}
-  .hero{background:var(--ink);color:#fff;text-align:center;padding:4rem 1rem 5rem}
-  .hero h1{font-size:2.4rem;margin:0 0 .75rem}
+  html{scroll-behavior:smooth}
+  .top{position:sticky;top:0;z-index:10;background:var(--ink);display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.25rem;flex-wrap:wrap;gap:.5rem}
+  .top .brand{color:var(--amber);font-weight:700;font-size:1.1rem;text-decoration:none}
+  .top nav-links a{color:#c9d3de}
+  .menu a{color:#c9d3de;text-decoration:none;margin-left:1.1rem;font-size:.95rem}
+  .menu a:hover{color:#fff}
+  .menu a.pill{background:var(--amber);color:#1b1500;padding:.4rem .9rem;border-radius:5px;font-weight:700}
+  .menu a.pill:hover{background:var(--amber-dark);color:#fff}
+
+  .hero{background:linear-gradient(160deg,#16212e 55%,#22364d);color:#fff;text-align:center;padding:4.5rem 1rem 6rem}
+  .hero .tag{display:inline-block;background:rgba(240,165,0,.15);color:var(--amber);border:1px solid rgba(240,165,0,.4);padding:.25rem .8rem;border-radius:99px;font-size:.82rem;margin-bottom:1rem}
+  .hero h1{font-size:clamp(1.9rem,5vw,3rem);margin:0 0 .9rem;line-height:1.15}
   .hero h1 span{color:var(--amber)}
-  .hero p{max-width:620px;margin:0 auto 1.75rem;color:#c9d3de;font-size:1.1rem}
+  .hero p{max-width:640px;margin:0 auto 1.75rem;color:#c9d3de;font-size:1.1rem}
   .hero .btn{display:inline-block;text-decoration:none;margin:.25rem;padding:.8rem 1.8rem}
   .hero .btn.outline{background:transparent;border:2px solid var(--amber);color:var(--amber)}
   .hero .btn.outline:hover{background:var(--amber);color:#1b1500}
-  .features{max-width:1100px;margin:-2.5rem auto 2rem;padding:0 1rem}
-  .feature h2{margin-bottom:.35rem}
+
+  .wrap{max-width:1100px;margin:0 auto;padding:0 1rem}
+  .stats{margin-top:-3rem}
+  .stats .grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+  .stats .card{text-align:center;margin:0}
+  .stats b{display:block;font-size:1.6rem;color:var(--amber-dark)}
+  .stats span{color:var(--muted);font-size:.88rem}
+
+  section.block{margin:3rem auto}
+  section.block > .wrap > h2.title{font-size:1.6rem;text-align:center;margin-bottom:.4rem}
+  .sub{text-align:center;color:var(--muted);margin:0 auto 1.5rem;max-width:600px}
   .feature .icon{font-size:1.8rem}
+  .feature h3{margin:.3rem 0}
   .feature p{margin:0;color:var(--muted);font-size:.93rem}
-  .steps{max-width:1100px;margin:0 auto 2rem;padding:0 1rem}
-  .steps ol{margin:0;padding-left:1.2rem}
-  .steps li{margin-bottom:.4rem}
+
+  .steps{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));counter-reset:s}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:1.2rem 1.2rem 1.2rem 3.4rem;position:relative}
+  .step::before{counter-increment:s;content:counter(s);position:absolute;left:1rem;top:1.1rem;width:1.8rem;height:1.8rem;border-radius:50%;background:var(--amber);color:#1b1500;font-weight:700;display:grid;place-items:center}
+  .step b{display:block}.step span{color:var(--muted);font-size:.9rem}
+
+  .est{display:grid;gap:1.5rem;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:center}
+  .est input[type=range]{padding:0;accent-color:var(--amber)}
+  .est-result{background:#fff7e0;border:1px dashed var(--amber);border-radius:8px;padding:1.2rem;text-align:center}
+  .est-result .big{font-size:2.2rem;font-weight:700}
+  .est-result table{margin-top:.8rem;font-size:.85rem}
+  .est-result td{border:0;padding:.2rem .4rem}
+  .est-result td:last-child{text-align:right}
+
+  .tips{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+  .tip{background:var(--card);border-left:5px solid var(--teal);border-radius:8px;padding:1rem;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .tip b{display:block}.tip span{color:var(--muted);font-size:.9rem}
+
+  details{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:.9rem 1.1rem;margin-bottom:.6rem}
+  summary{cursor:pointer;font-weight:600}
+  details p{margin:.6rem 0 0;color:var(--muted)}
+
+  .cta-band{background:var(--ink);color:#fff;text-align:center;padding:3rem 1rem}
+  .cta-band h2{margin:0 0 .5rem;font-size:1.6rem}
+  .cta-band p{color:#c9d3de;margin:0 0 1.2rem}
+  .cta-band .btn{display:inline-block;text-decoration:none;margin:.25rem;padding:.8rem 1.8rem}
   footer{text-align:center;color:var(--muted);padding:1.5rem 1rem;font-size:.85rem}
 </style>
 </head>
 <body>
 
-<div class="top">
-  <span class="brand">⚡ Electricity Tracker</span>
-  <span id="topLinks"></span>
-</div>
+<header class="top">
+  <a class="brand" href="index.html">⚡ Electricity Tracker</a>
+  <div class="menu">
+    <a href="#features">Features</a>
+    <a href="#estimator">Estimator</a>
+    <a href="#how">How it works</a>
+    <a href="#faq">FAQ</a>
+    <span id="topLinks"></span>
+  </div>
+</header>
 
 <section class="hero">
-  <h1>Track your electricity. <span>Cut your bill.</span></h1>
-  <p>Record meter readings, manage your bills, see monthly trends and find out which appliances use the most power, all in one place.</p>
-  <div id="cta"></div>
+  <span class="tag">Free &middot; Simple &middot; Secure</span>
+  <h1>Know your electricity use. <span>Cut your bill.</span></h1>
+  <p>Record meter readings, store every bill, spot rising usage early and find which appliances cost you the most, all in one dashboard.</p>
+  <div class="cta"></div>
 </section>
 
-<section class="features">
+<div class="wrap stats">
   <div class="grid">
-    <div class="card feature"><div class="icon">📊</div><h2>Dashboard</h2><p>Units used, estimated bill, monthly averages and usage charts at a glance.</p></div>
-    <div class="card feature"><div class="icon">🔢</div><h2>Meter Readings</h2><p>Enter readings and get units consumed calculated automatically.</p></div>
-    <div class="card feature"><div class="icon">🧾</div><h2>Bill History</h2><p>Save bills, search by month or date, filter by status, edit or delete.</p></div>
-    <div class="card feature"><div class="icon">🔌</div><h2>Appliance Calculator</h2><p>Estimate daily and monthly consumption and cost for every appliance.</p></div>
+    <div class="card"><b>8</b><span>Easy-to-use pages</span></div>
+    <div class="card"><b>Auto</b><span>Units &amp; bill calculation</span></div>
+    <div class="card"><b>6 months</b><span>Usage &amp; bill charts</span></div>
+    <div class="card"><b>100%</b><span>Your data, private login</span></div>
   </div>
-</section>
+</div>
 
-<section class="steps">
-  <div class="card">
-    <h2>How it works</h2>
-    <ol>
-      <li>Create an account with your consumer number.</li>
-      <li>Add your meter reading each month.</li>
-      <li>Save your bill when it arrives.</li>
-      <li>Watch your dashboard to spot rising usage early.</li>
-    </ol>
+<section class="block" id="features"><div class="wrap">
+  <h2 class="title">Everything you need to manage electricity</h2>
+  <p class="sub">From the first meter reading to the final payment, every step is covered.</p>
+  <div class="grid">
+    <div class="card feature"><div class="icon">📊</div><h3>Smart dashboard</h3><p>This month's units, estimated bill, last month's figures, average usage and an up/down trend indicator.</p></div>
+    <div class="card feature"><div class="icon">🔢</div><h3>Meter readings</h3><p>Enter your current reading and units consumed are calculated for you. Bad entries are blocked.</p></div>
+    <div class="card feature"><div class="icon">🧾</div><h3>Bill history</h3><p>Search by month or date, filter by Paid, Unpaid or Overdue, view details, edit or delete.</p></div>
+    <div class="card feature"><div class="icon">🔌</div><h3>Appliance calculator</h3><p>Enter watts, quantity and hours to see daily and monthly units plus estimated cost per appliance.</p></div>
   </div>
+</div></section>
+
+<section class="block" id="estimator"><div class="wrap">
+  <h2 class="title">Try the bill estimator</h2>
+  <p class="sub">No account needed. Slide to your monthly units to see an estimated bill.</p>
+  <div class="card est">
+    <div>
+      <label for="units">Units used this month: <b id="uVal">150</b></label>
+      <input type="range" id="units" min="0" max="600" step="5" value="150">
+      <p class="muted" style="margin-top:.8rem">Sample slab rates: first 100 units ₹3.0, next 100 ₹4.5, next 100 ₹6.0, above 300 ₹7.5, plus a ₹50 fixed charge.</p>
+    </div>
+    <div class="est-result">
+      <div class="muted">Estimated bill</div>
+      <div class="big" id="estTotal">₹0.00</div>
+      <table><tbody id="estRows"></tbody></table>
+    </div>
+  </div>
+</div></section>
+
+<section class="block" id="how"><div class="wrap">
+  <h2 class="title">Up and running in four steps</h2>
+  <p class="sub">It takes about two minutes to get your first insights.</p>
+  <div class="steps">
+    <div class="step"><b>Create an account</b><span>Register with your consumer number.</span></div>
+    <div class="step"><b>Add a meter reading</b><span>Units are calculated automatically.</span></div>
+    <div class="step"><b>Save your bill</b><span>Keep amount, date and status together.</span></div>
+    <div class="step"><b>Watch the dashboard</b><span>Spot rising usage before the bill arrives.</span></div>
+  </div>
+</div></section>
+
+<section class="block"><div class="wrap">
+  <h2 class="title">Simple ways to lower your bill</h2>
+  <p class="sub">Use the Appliance Calculator to see which of these matter most in your home.</p>
+  <div class="tips">
+    <div class="tip"><b>Switch to LED lighting</b><span>LEDs use far fewer watts than old bulbs for the same light.</span></div>
+    <div class="tip"><b>Set the AC to 24–26°C</b><span>Each degree cooler adds noticeably to consumption.</span></div>
+    <div class="tip"><b>Unplug idle devices</b><span>Chargers and set-top boxes draw power on standby.</span></div>
+    <div class="tip"><b>Check your slabs</b><span>Staying below a slab limit can cut your cost per unit.</span></div>
+  </div>
+</div></section>
+
+<section class="block" id="faq"><div class="wrap" style="max-width:760px">
+  <h2 class="title">Questions</h2>
+  <details><summary>Is my data private?</summary><p>Yes. You log in with your own account, and passwords are stored encrypted. You only see your own readings, bills and appliances.</p></details>
+  <details><summary>How is the estimated bill calculated?</summary><p>Your units are split across tariff slabs, each with its own rate, and a fixed charge is added. The slabs are configurable to match your electricity board.</p></details>
+  <details><summary>Can I edit or delete a bill?</summary><p>Yes. Open Bill History, then use View, Edit or Delete on any bill.</p></details>
+  <details><summary>What if I enter a wrong meter reading?</summary><p>The app checks that readings are positive and that the current reading is not lower than the previous one, and shows a clear message if not.</p></details>
+</div></section>
+
+<section class="cta-band">
+  <h2>Ready to take control of your electricity bill?</h2>
+  <p>Create your free account and add your first reading today.</p>
+  <div class="cta"></div>
 </section>
 
 <footer>Electricity Bill &amp; Usage Tracker &middot; Major Project</footer>
 
 <script>
+  // ---- Show buttons depending on login state ----
   const loggedIn = !!localStorage.getItem("token");
   document.getElementById("topLinks").innerHTML = loggedIn
-    ? '<a class="link" href="dashboard.html">Dashboard</a>'
-    : '<a class="link" href="login.html">Log in</a><a class="link" href="register.html">Register</a>';
-  document.getElementById("cta").innerHTML = loggedIn
+    ? '<a class="pill" href="dashboard.html">Dashboard</a>'
+    : '<a href="login.html">Log in</a><a class="pill" href="register.html">Register</a>';
+  document.querySelectorAll(".cta").forEach(el => el.innerHTML = loggedIn
     ? '<a class="btn" href="dashboard.html">Go to Dashboard</a>'
-    : '<a class="btn" href="register.html">Get started</a><a class="btn outline" href="login.html">Log in</a>';
+    : '<a class="btn" href="register.html">Get started free</a><a class="btn outline" href="login.html" style="background:transparent;border:2px solid var(--amber);color:var(--amber)">Log in</a>');
+
+  // ---- Bill estimator (same slabs as backend TariffService) ----
+  const SLABS = [[100, 3.0], [100, 4.5], [100, 6.0], [Infinity, 7.5]], FIXED = 50;
+  const inr = n => "₹" + n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  function estimate() {
+    const u = +units.value; uVal.textContent = u;
+    let left = u, total = 0, rows = "", from = 0;
+    SLABS.forEach(([size, rate]) => {
+      const used = Math.min(left, size);
+      if (used > 0) {
+        rows += `<tr><td>${from + 1}–${size === Infinity ? "above" : from + size} units: ${used} × ₹${rate}</td><td>${inr(used * rate)}</td></tr>`;
+        total += used * rate; left -= used;
+      }
+      from += size;
+    });
+    if (u > 0) { rows += `<tr><td>Fixed charge</td><td>${inr(FIXED)}</td></tr>`; total += FIXED; }
+    estTotal.textContent = inr(total);
+    estRows.innerHTML = rows || '<tr><td colspan="2" class="muted">Move the slider</td></tr>';
+  }
+  units.addEventListener("input", estimate); estimate();
 </script>
 </body>
 </html>
