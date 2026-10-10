@@ -1,0 +1,1 @@
+electriccitytracker-frontend.vercel.app
