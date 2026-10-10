@@ -1,0 +1,24 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login | Electricity Tracker</title><link rel="stylesheet" href="css/style.css"></head><body>
+<div class="auth-wrap"><div class="brand">⚡ Electricity <span>Bill &amp; Usage Tracker</span></div>
+<div class="card"><h1>Log in</h1><div id="msg" class="msg"></div>
+<form id="f" novalidate>
+ <label>Email</label><input name="email" type="email" autocomplete="email"><div class="field-error" data-err="email"></div>
+ <label>Password</label><input name="password" type="password" autocomplete="current-password"><div class="field-error" data-err="password"></div>
+ <button class="btn" type="submit">Log in</button>
+</form><p class="muted">New here? <a href="register.html">Create an account</a></p></div></div>
+<script src="js/app.js"></script>
+<script>
+if (getToken()) location.href = "dashboard.html";
+const f = document.getElementById("f");
+f.addEventListener("submit", async e => {
+  e.preventDefault();
+  const data = validate(f, { email: [R.required("Email"), R.email], password: [R.required("Password")] });
+  if (!data) return;
+  try {
+    const r = await api("/auth/login", "POST", data);
+    localStorage.setItem("token", r.token); localStorage.setItem("user", JSON.stringify(r.user));
+    location.href = "dashboard.html";
+  } catch (err) { showErrors(err, f); }
+});
+</script></body></html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Profile | Electricity Tracker</title><link rel="stylesheet" href="css/style.css"></head><body>
+<div id="nav"></div><main class="container" style="max-width:640px">
+<h1>Profile</h1><div id="msg" class="msg"></div>
+<div class="card"><form id="f" novalidate>
+ <label>Full name</label><input name="name"><div class="field-error" data-err="name"></div>
+ <label>Email (cannot be changed)</label><input name="email" readonly>
+ <label>Consumer number</label><input name="consumerNumber"><div class="field-error" data-err="consumerNumber"></div>
+ <label>Address</label><textarea name="address" rows="2"></textarea>
+ <label>New password (leave blank to keep current)</label><input name="newPassword" type="password"><div class="field-error" data-err="newPassword"></div>
+ <button class="btn" type="submit">Save changes</button>
+</form></div></main>
+<script src="js/app.js"></script>
+<script>
+requireAuth(); renderNav("profile");
+const f = document.getElementById("f");
+api("/profile").then(u => { f.name.value = u.name; f.email.value = u.email; f.consumerNumber.value = u.consumerNumber || ""; f.address.value = u.address || ""; })
+  .catch(e => showMsg(e.message, false));
+f.addEventListener("submit", async e => {
+  e.preventDefault();
+  const rules = { name: [R.required("Name")], consumerNumber: [R.required("Consumer number")] };
+  if (f.newPassword.value) rules.newPassword = [R.minLen(6)];
+  const data = validate(f, rules); if (!data) return;
+  try {
+    const u = await api("/profile", "PUT", { name: data.name, consumerNumber: data.consumerNumber, address: data.address, newPassword: data.newPassword });
+    localStorage.setItem("user", JSON.stringify(u)); f.newPassword.value = ""; showMsg("Profile updated");
+  } catch (err) { showErrors(err, f); }
+});
+</script></body></html>

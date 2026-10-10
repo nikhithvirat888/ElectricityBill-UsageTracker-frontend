@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Appliance Calculator | Electricity Tracker</title><link rel="stylesheet" href="css/style.css"></head><body>
+<div id="nav"></div><main class="container">
+<h1>Appliance Calculator</h1><div id="msg" class="msg"></div>
+<div class="card"><form id="f" novalidate>
+ <div class="row">
+  <div><label>Appliance name</label><input name="applianceName" placeholder="e.g. Ceiling fan"><div class="field-error" data-err="applianceName"></div></div>
+  <div><label>Power (watts)</label><input name="wattage" type="number" step="0.1" min="0"><div class="field-error" data-err="wattage"></div></div>
+  <div><label>Quantity</label><input name="quantity" type="number" step="1" min="1" value="1"><div class="field-error" data-err="quantity"></div></div>
+  <div><label>Hours used per day</label><input name="hoursPerDay" type="number" step="0.1" min="0" max="24"><div class="field-error" data-err="hoursPerDay"></div></div>
+  <div><label>Number of days (per month)</label><input name="daysPerMonth" type="number" step="1" min="1" max="31" value="30"><div class="field-error" data-err="daysPerMonth"></div></div>
+ </div>
+ <div class="preview"><span>Daily: <b id="pDaily">0</b> units</span><span>Monthly: <b id="pMonthly">0</b> units</span><span>Estimated cost: <b id="pCost">₹0.00</b></span></div>
+ <button class="btn" type="submit">Add appliance</button>
+</form></div>
+<div class="card"><h2>Your appliances</h2><div class="table-wrap"><table>
+ <thead><tr><th>Appliance</th><th>Watts</th><th>Qty</th><th>Hours/day</th><th>Days</th><th>Daily units</th><th>Monthly units</th><th>Est. cost</th><th></th></tr></thead>
+ <tbody id="rows"></tbody>
+ <tfoot><tr><td colspan="5">Total estimated consumption</td><td id="tDaily"></td><td id="tMonthly"></td><td id="tCost"></td><td></td></tr></tfoot>
+</table></div><p class="muted" id="rateNote"></p></div>
+</main>
+<script src="js/app.js"></script>
+<script>
+requireAuth(); renderNav("appliances");
+const f = document.getElementById("f"); let rate = 6;
+function preview() {
+  const w = +f.wattage.value, q = +f.quantity.value, h = +f.hoursPerDay.value, d = +f.daysPerMonth.value;
+  const daily = w * q * h / 1000, monthly = daily * d;
+  pDaily.textContent = daily.toFixed(2); pMonthly.textContent = monthly.toFixed(2); pCost.textContent = money(monthly * rate);
+}
+["wattage", "quantity", "hoursPerDay", "daysPerMonth"].forEach(n => f[n].addEventListener("input", preview));
+
+async function load() {
+  try {
+    const [list, s] = await Promise.all([api("/appliances"), api("/appliances/summary")]);
+    rate = s.ratePerUnit; rateNote.textContent = "Cost is estimated at ₹" + rate + " per unit."; preview();
+    rows.innerHTML = list.length ? list.map(a => `<tr><td>${esc(a.applianceName)}</td><td>${num(a.wattage)}</td><td>${a.quantity}</td><td>${num(a.hoursPerDay)}</td><td>${a.daysPerMonth}</td>
+      <td>${num(a.dailyUnits)}</td><td>${num(a.monthlyUnits)}</td><td>${money(a.estimatedCost)}</td>
+      <td><button class="btn small danger" onclick="del(${a.id})">Delete</button></td></tr>`).join("")
+      : `<tr><td colspan="9" class="muted">No appliances yet. Add one above to see your estimated usage.</td></tr>`;
+    tDaily.textContent = num(s.totalDailyUnits); tMonthly.textContent = num(s.totalMonthlyUnits); tCost.textContent = money(s.totalEstimatedCost);
+  } catch (e) { showMsg(e.message, false); }
+}
+async function del(id) {
+  if (!confirm("Remove this appliance?")) return;
+  try { await api("/appliances/" + id, "DELETE"); load(); } catch (e) { showMsg(e.message, false); }
+}
+f.addEventListener("submit", async e => {
+  e.preventDefault();
+  const data = validate(f, {
+    applianceName: [R.required("Appliance name")], wattage: [R.positive("Wattage")], quantity: [R.positive("Quantity")],
+    hoursPerDay: [R.positive("Hours per day"), R.max(24, "Hours per day")], daysPerMonth: [R.positive("Number of days"), R.max(31, "Number of days")]
+  });
+  if (!data) return;
+  try {
+    await api("/appliances", "POST", { applianceName: data.applianceName.trim(), wattage: +data.wattage, quantity: +data.quantity, hoursPerDay: +data.hoursPerDay, daysPerMonth: +data.daysPerMonth });
+    showMsg("Appliance added"); f.applianceName.value = f.wattage.value = f.hoursPerDay.value = ""; f.quantity.value = 1; preview(); load();
+  } catch (err) { showErrors(err, f); }
+});
+load();
+</script></body></html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meter Reading | Electricity Tracker</title><link rel="stylesheet" href="css/style.css"></head><body>
+<div id="nav"></div><main class="container">
+<h1>Meter Reading</h1><div id="msg" class="msg"></div>
+<div class="card"><form id="f" novalidate>
+ <div class="row">
+  <div><label>Previous reading</label><input name="previousReading" type="number" step="0.01" readonly><div class="field-error" data-err="previousReading"></div></div>
+  <div><label>Current reading</label><input name="currentReading" type="number" step="0.01" min="0"><div class="field-error" data-err="currentReading"></div></div>
+  <div><label>Units consumed</label><input id="units" readonly value="0"></div>
+  <div><label>Reading date</label><input name="readingDate" type="date"><div class="field-error" data-err="readingDate"></div></div>
+ </div>
+ <button class="btn" type="submit">Save reading</button>
+</form></div>
+<div class="card"><h2>Saved readings</h2><div class="table-wrap"><table>
+ <thead><tr><th>Date</th><th>Previous</th><th>Current</th><th>Units</th><th></th></tr></thead><tbody id="rows"></tbody></table></div></div>
+</main>
+<script src="js/app.js"></script>
+<script>
+requireAuth(); renderNav("meter");
+const f = document.getElementById("f");
+const calc = () => { const u = Number(f.currentReading.value) - Number(f.previousReading.value); units.value = f.currentReading.value ? (u >= 0 ? u.toFixed(2) : "Invalid") : "0"; };
+f.currentReading.addEventListener("input", calc);
+
+async function load() {
+  const last = await api("/meter/latest");
+  f.previousReading.value = last.previousReading;
+  f.readingDate.value = today(); f.readingDate.max = today();
+  const list = await api("/meter");
+  rows.innerHTML = list.length ? list.map(r => `<tr><td>${r.readingDate}</td><td>${num(r.previousReading)}</td><td>${num(r.currentReading)}</td><td>${num(r.unitsConsumed)}</td>
+    <td><button class="btn small danger" onclick="del(${r.id})">Delete</button></td></tr>`).join("")
+    : `<tr><td colspan="5" class="muted">No readings yet. Enter your first meter reading above.</td></tr>`;
+}
+async function del(id) {
+  if (!confirm("Delete this reading?")) return;
+  try { await api("/meter/" + id, "DELETE"); showMsg("Reading deleted"); load(); } catch (e) { showMsg(e.message, false); }
+}
+f.addEventListener("submit", async e => {
+  e.preventDefault();
+  const data = validate(f, {
+    previousReading: [R.nonNegative("Previous reading")],
+    currentReading: [R.required("Current reading"), R.positive("Current reading"), R.notLower("previousReading", "currentReading")],
+    readingDate: [R.required("Reading date")]
+  });
+  if (!data) return;
+  try {
+    await api("/meter", "POST", { previousReading: +data.previousReading, currentReading: +data.currentReading, readingDate: data.readingDate });
+    showMsg("Reading saved"); f.currentReading.value = ""; units.value = "0"; load();
+  } catch (err) { showErrors(err, f); }
+});
+load().catch(e => showMsg(e.message, false));
+</script></body></html>

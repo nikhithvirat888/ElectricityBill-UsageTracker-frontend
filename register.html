@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Register | Electricity Tracker</title><link rel="stylesheet" href="css/style.css"></head><body>
+<div class="auth-wrap"><div class="brand">⚡ Electricity <span>Bill &amp; Usage Tracker</span></div>
+<div class="card"><h1>Create account</h1><div id="msg" class="msg"></div>
+<form id="f" novalidate>
+ <label>Full name</label><input name="name"><div class="field-error" data-err="name"></div>
+ <label>Email</label><input name="email" type="email"><div class="field-error" data-err="email"></div>
+ <label>Password (min 6 characters)</label><input name="password" type="password"><div class="field-error" data-err="password"></div>
+ <label>Consumer number</label><input name="consumerNumber"><div class="field-error" data-err="consumerNumber"></div>
+ <label>Address</label><textarea name="address" rows="2"></textarea>
+ <button class="btn" type="submit">Register</button>
+</form><p class="muted">Already registered? <a href="login.html">Log in</a></p></div></div>
+<script src="js/app.js"></script>
+<script>
+const f = document.getElementById("f");
+f.addEventListener("submit", async e => {
+  e.preventDefault();
+  const data = validate(f, {
+    name: [R.required("Name")], email: [R.required("Email"), R.email],
+    password: [R.required("Password"), R.minLen(6)], consumerNumber: [R.required("Consumer number")]
+  });
+  if (!data) return;
+  try {
+    await api("/auth/register", "POST", data);
+    showMsg("Registration successful. Redirecting to login…");
+    setTimeout(() => location.href = "login.html", 1200);
+  } catch (err) { showErrors(err, f); }
+});
+</script></body></html>

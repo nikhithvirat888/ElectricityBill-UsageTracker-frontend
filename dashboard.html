@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard | Electricity Tracker</title><link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script></head><body>
+<div id="nav"></div><main class="container">
+<h1>Dashboard</h1><div id="msg" class="msg"></div>
+<div class="grid">
+ <div class="stat"><div class="label">This month's units</div><div class="value" id="curUnits">–</div></div>
+ <div class="stat"><div class="label">Estimated bill</div><div class="value" id="estBill">–</div></div>
+ <div class="stat blue"><div class="label">Last month's units</div><div class="value" id="prevUnits">–</div></div>
+ <div class="stat blue"><div class="label">Last month's bill</div><div class="value" id="prevBill">–</div></div>
+ <div class="stat teal"><div class="label">Average monthly usage</div><div class="value" id="avg">–</div></div>
+ <div class="stat teal"><div class="label">Compared with last month</div><div class="value" id="trend">–</div></div>
+</div>
+<div class="charts" style="margin-top:1.25rem">
+ <div class="card"><h2>Monthly usage (units)</h2><div class="chart-box"><canvas id="usageChart"></canvas></div></div>
+ <div class="card"><h2>Monthly bill (₹)</h2><div class="chart-box"><canvas id="billChart"></canvas></div></div>
+</div>
+<p class="muted">Usage comes from your meter readings; bill amounts come from the bills you add. Charts show the last 6 months.</p>
+</main>
+<script src="js/app.js"></script>
+<script>
+requireAuth(); renderNav("dashboard");
+(async () => {
+  try {
+    const d = await api("/dashboard");
+    curUnits.textContent = num(d.currentMonthUnits) + " units";
+    estBill.textContent = money(d.estimatedBill);
+    prevUnits.textContent = num(d.previousMonthUnits) + " units";
+    prevBill.textContent = money(d.previousMonthBill);
+    avg.textContent = num(d.averageMonthlyUsage) + " units";
+    const pct = Math.abs(d.changePercent);
+    trend.className = "value " + d.trend.toLowerCase();
+    trend.textContent = d.trend === "UP" ? "▲ " + pct + "% more" : d.trend === "DOWN" ? "▼ " + pct + "% less" : "No change";
+    const opts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } };
+    new Chart(usageChart, { type: "bar", data: { labels: d.labels, datasets: [{ label: "Units", data: d.usageSeries, backgroundColor: "#f0a500" }] }, options: opts });
+    new Chart(billChart, { type: "line", data: { labels: d.labels, datasets: [{ label: "Bill (₹)", data: d.billSeries, borderColor: "#2b5fa5", backgroundColor: "rgba(43,95,165,.15)", fill: true, tension: .3 }] }, options: opts });
+  } catch (e) { showMsg(e.message, false); }
+})();
+</script></body></html>

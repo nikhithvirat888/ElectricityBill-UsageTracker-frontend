@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bill History | Electricity Tracker</title><link rel="stylesheet" href="css/style.css"></head><body>
+<div id="nav"></div><main class="container">
+<h1>Bill History</h1><div id="msg" class="msg"></div>
+<div class="card"><div class="filters">
+ <div><label>Month</label><input type="month" id="month"></div>
+ <div><label>From date</label><input type="date" id="from"></div>
+ <div><label>To date</label><input type="date" id="to"></div>
+ <div><label>Status</label><select id="status"><option value="">All</option><option>PAID</option><option>UNPAID</option><option>OVERDUE</option></select></div>
+ <div><button class="btn" onclick="load()">Search</button> <button class="btn ghost" onclick="resetFilters()">Reset</button></div>
+</div></div>
+<div class="card"><div class="table-wrap"><table>
+ <thead><tr><th>Date</th><th>Previous</th><th>Current</th><th>Units</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+ <tbody id="rows"></tbody>
+ <tfoot><tr><td colspan="3">Total (shown bills)</td><td id="tUnits"></td><td id="tAmt"></td><td colspan="2"></td></tr></tfoot>
+</table></div></div>
+</main>
+<dialog id="dlg"><h2>Bill details</h2><dl id="details"></dl><button class="btn ghost" onclick="dlg.close()">Close</button></dialog>
+<script src="js/app.js"></script>
+<script>
+requireAuth(); renderNav("history");
+let bills = [], consumerNo = "";
+async function load() {
+  const q = new URLSearchParams();
+  [["month", month.value], ["from", from.value], ["to", to.value], ["status", status.value]].forEach(([k, v]) => v && q.set(k, v));
+  try {
+    bills = await api("/bills?" + q);
+    rows.innerHTML = bills.length ? bills.map(b => `<tr><td>${b.billDate}</td><td>${num(b.previousReading)}</td><td>${num(b.currentReading)}</td>
+      <td>${num(b.unitsConsumed)}</td><td>${money(b.billAmount)}</td><td><span class="badge ${esc(b.status)}">${esc(b.status)}</span></td>
+      <td><button class="btn small ghost" onclick="view(${b.id})">View</button><a class="btn small" style="text-decoration:none;display:inline-block" href="add-bill.html?id=${b.id}">Edit</a>
+      <button class="btn small danger" onclick="del(${b.id})">Delete</button></td></tr>`).join("")
+      : `<tr><td colspan="7" class="muted">No bills found. Add a bill or clear the filters.</td></tr>`;
+    tUnits.textContent = num(bills.reduce((s, b) => s + b.unitsConsumed, 0));
+    tAmt.textContent = money(bills.reduce((s, b) => s + b.billAmount, 0));
+  } catch (e) { showMsg(e.message, false); }
+}
+function resetFilters() { month.value = from.value = to.value = status.value = ""; load(); }
+function view(id) {
+  const b = bills.find(x => x.id === id);
+  details.innerHTML = `<dt>Consumer no.</dt><dd>${esc(consumerNo)}</dd><dt>Bill date</dt><dd>${b.billDate}</dd>
+   <dt>Previous reading</dt><dd>${num(b.previousReading)}</dd><dt>Current reading</dt><dd>${num(b.currentReading)}</dd>
+   <dt>Units consumed</dt><dd>${num(b.unitsConsumed)}</dd><dt>Bill amount</dt><dd>${money(b.billAmount)}</dd><dt>Status</dt><dd>${esc(b.status)}</dd>`;
+  dlg.showModal();
+}
+async function del(id) {
+  if (!confirm("Delete this bill? This cannot be undone.")) return;
+  try { await api("/bills/" + id, "DELETE"); showMsg("Bill deleted"); load(); } catch (e) { showMsg(e.message, false); }
+}
+api("/profile").then(u => consumerNo = u.consumerNumber).catch(() => {});
+load();
+</script></body></html>
